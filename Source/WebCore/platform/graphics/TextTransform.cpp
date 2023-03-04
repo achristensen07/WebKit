@@ -32,10 +32,12 @@
 namespace WebCore {
 
 // https://w3c.github.io/csswg-drafts/css-text/#full-width
+#if !PLATFORM(COCOA)
 String transformToFullWidth(const String& text)
 {
     // TODO: implement for all platforms.
     return text;
 }
+#endif
 
 } // namespace WebCore
