@@ -1857,7 +1857,7 @@ WebProcessProxy& WebPageProxy::ensureRunningProcess()
     return m_legacyMainFrameProcess;
 }
 
-RefPtr<API::Navigation> WebPageProxy::loadRequest(ResourceRequest&& request, ShouldOpenExternalURLsPolicy shouldOpenExternalURLsPolicy, IsPerformingHTTPFallback isPerformingHTTPFallback, API::Object* userData)
+RefPtr<API::Navigation> WebPageProxy::loadRequest(WebCore::ResourceRequest&& request, ShouldOpenExternalURLsPolicy shouldOpenExternalURLsPolicy, IsPerformingHTTPFallback isPerformingHTTPFallback, std::unique_ptr<NavigationActionData> lastNavigationAction, API::Object* userData)
 {
     if (m_isClosed)
         return nullptr;
@@ -1868,6 +1868,9 @@ RefPtr<API::Navigation> WebPageProxy::loadRequest(ResourceRequest&& request, Sho
         launchProcess(Site { request.url() }, ProcessLaunchReason::InitialProcess);
 
     Ref navigation = m_navigationState->createLoadRequestNavigation(legacyMainFrameProcess().coreProcessIdentifier(), ResourceRequest(request), m_backForwardList->protectedCurrentItem());
+
+    if (lastNavigationAction)
+        navigation->setLastNavigationAction(*lastNavigationAction);
 
     auto navigationData = navigation->lastNavigationAction();
     navigationData.isRequestFromClientOrUserInput = true;
@@ -1882,6 +1885,11 @@ RefPtr<API::Navigation> WebPageProxy::loadRequest(ResourceRequest&& request, Sho
 
     loadRequestWithNavigationShared(protectedLegacyMainFrameProcess(), internals().webPageID, navigation, WTFMove(request), shouldOpenExternalURLsPolicy, isPerformingHTTPFallback, userData, ShouldTreatAsContinuingLoad::No, isNavigatingToAppBoundDomain(), std::nullopt, std::nullopt);
     return navigation;
+}
+
+RefPtr<API::Navigation> WebPageProxy::loadRequest(WebCore::ResourceRequest&& request, WebCore::ShouldOpenExternalURLsPolicy shouldOpenExternalURLsPolicy, WebCore::IsPerformingHTTPFallback isPerformingHTTPFallback)
+{
+    return loadRequest(WTFMove(request), shouldOpenExternalURLsPolicy, isPerformingHTTPFallback, nullptr);
 }
 
 RefPtr<API::Navigation> WebPageProxy::loadRequest(ResourceRequest&& request, ShouldOpenExternalURLsPolicy shouldOpenExternalURLsPolicy)
@@ -7802,6 +7810,10 @@ static void trySOAuthorization(Ref<API::PageConfiguration>&& configuration, Ref<
     uiClientCallback(WTFMove(navigationAction), WTFMove(newPageCallback));
 }
 
+// FIXME: navigationActionData.hasOpener and windowFeatures.wantsNoOpener() are almost redundant bits that we are assuming are always equal,
+// except noreferrer and noopener are similar and related but slightly different.
+// Serialize WindowFeatures.noreferrer, distinguish between noopener and noreferrer in the UI process, and stop
+// serializing redundant information that has to be just right.
 void WebPageProxy::createNewPage(IPC::Connection& connection, WindowFeatures&& windowFeatures, NavigationActionData&& navigationActionData, CompletionHandler<void(std::optional<WebCore::PageIdentifier>, std::optional<WebKit::WebPageCreationParameters>)>&& reply)
 {
     auto& originatingFrameInfoData = navigationActionData.originatingFrameInfoData;
@@ -7819,6 +7831,8 @@ void WebPageProxy::createNewPage(IPC::Connection& connection, WindowFeatures&& w
     if (RefPtr page = originatingFrameInfo->page())
         openerAppInitiatedState = page->lastNavigationWasAppInitiated();
 
+    auto navigationDataForNewProcess = navigationActionData.hasOpener ? nullptr : makeUnique<NavigationActionData>(navigationActionData);
+
     auto completionHandler = [
         this,
         protectedThis = Ref { *this },
@@ -7827,6 +7841,8 @@ void WebPageProxy::createNewPage(IPC::Connection& connection, WindowFeatures&& w
         reply = WTFMove(reply),
         privateClickMeasurement = navigationActionData.privateClickMeasurement,
         openerAppInitiatedState = WTFMove(openerAppInitiatedState),
+        navigationDataForNewProcess = WTFMove(navigationDataForNewProcess),
+        shouldOpenExternalURLsPolicy = navigationActionData.shouldOpenExternalURLsPolicy,
         wantsNoOpener = windowFeatures.wantsNoOpener()
     ] (RefPtr<WebPageProxy> newPage) mutable {
         if (!newPage) {
@@ -7846,9 +7862,16 @@ void WebPageProxy::createNewPage(IPC::Connection& connection, WindowFeatures&& w
                 networkProcess->send(Messages::NetworkProcess::CloneSessionStorageForWebPage(sessionID(), identifier(), newPage->identifier()), 0);
         }
 
-        reply(newPage->webPageIDInMainFrameProcess(), newPage->creationParameters(protectedLegacyMainFrameProcess(), *newPage->drawingArea(), newPage->m_mainFrame->frameID(), std::nullopt));
-
         newPage->m_shouldSuppressAppLinksInNextNavigationPolicyDecision = mainFrameURL.host() == request.url().host();
+
+        if (navigationDataForNewProcess) {
+            reply(std::nullopt, std::nullopt);
+            newPage->loadRequest(WTFMove(request), shouldOpenExternalURLsPolicy, IsPerformingHTTPFallback::No, WTFMove(navigationDataForNewProcess));
+            return;
+        }
+
+        ASSERT(newPage->m_mainFrame);
+        reply(newPage->webPageIDInMainFrameProcess(), newPage->creationParameters(protectedLegacyMainFrameProcess(), *newPage->drawingArea(), newPage->m_mainFrame->frameID(), std::nullopt));
 
         if (privateClickMeasurement)
             newPage->internals().privateClickMeasurement = { { WTFMove(*privateClickMeasurement), { }, { } } };
@@ -7871,9 +7894,9 @@ void WebPageProxy::createNewPage(IPC::Connection& connection, WindowFeatures&& w
     Ref navigationAction = API::NavigationAction::create(WTFMove(navigationActionData), originatingFrameInfo.ptr(), nullptr, String(), WTFMove(request), URL(), shouldOpenAppLinks, WTFMove(userInitiatedActivity));
 
     Ref configuration = this->configuration().copy();
-    configuration->setRelatedPage(*this);
 
     if (RefPtr openerFrame = WebFrameProxy::webFrame(originatingFrameInfoData.frameID); navigationActionData.hasOpener && openerFrame) {
+        configuration->setRelatedPage(*this);
         configuration->setOpenerInfo({ {
             openerFrame->frameProcess().process(),
             openerFrame->frameProcess().site(),

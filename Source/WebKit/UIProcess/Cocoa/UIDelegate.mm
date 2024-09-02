@@ -338,18 +338,13 @@ void UIDelegate::UIClient::createNewPage(WebKit::WebPageProxy&, Ref<API::PageCon
     if (m_uiDelegate->m_delegateMethods.webViewCreateWebViewWithConfigurationForNavigationActionWindowFeaturesAsync) {
         auto checker = CompletionHandlerCallChecker::create(delegate.get(), @selector(_webView:createWebViewWithConfiguration:forNavigationAction:windowFeatures:completionHandler:));
 
-        [(id<WKUIDelegatePrivate>)delegate _webView:m_uiDelegate->m_webView.get().get() createWebViewWithConfiguration:wrapper(configuration) forNavigationAction:wrapper(navigationAction) windowFeatures:wrapper(apiWindowFeatures) completionHandler:makeBlockPtr([completionHandler = WTFMove(completionHandler), checker = WTFMove(checker), relatedWebView = m_uiDelegate->m_webView.get(), openerInfo] (WKWebView *webView) mutable {
+        [(id<WKUIDelegatePrivate>)delegate _webView:m_uiDelegate->m_webView.get().get() createWebViewWithConfiguration:wrapper(configuration) forNavigationAction:wrapper(navigationAction) windowFeatures:wrapper(apiWindowFeatures) completionHandler:makeBlockPtr([completionHandler = WTFMove(completionHandler), checker = WTFMove(checker), openerInfo] (WKWebView *webView) mutable {
             if (checker->completionHandlerHasBeenCalled())
                 return;
             checker->didCallCompletionHandler();
 
             if (!webView)
                 return completionHandler(nullptr);
-
-            ALLOW_DEPRECATED_DECLARATIONS_BEGIN
-            if ([webView->_configuration _relatedWebView] != relatedWebView.get())
-                [NSException raise:NSInternalInconsistencyException format:@"Returned WKWebView was not created with the given configuration."];
-            ALLOW_DEPRECATED_DECLARATIONS_END
 
             // FIXME: Move this to WebPageProxy once rdar://134317255 and rdar://134317400 are resolved.
             if (openerInfo != webView->_configuration->_pageConfiguration->openerInfo())
@@ -365,11 +360,6 @@ void UIDelegate::UIClient::createNewPage(WebKit::WebPageProxy&, Ref<API::PageCon
     RetainPtr<WKWebView> webView = [delegate webView:m_uiDelegate->m_webView.get().get() createWebViewWithConfiguration:wrapper(configuration) forNavigationAction:wrapper(navigationAction) windowFeatures:wrapper(apiWindowFeatures)];
     if (!webView)
         return completionHandler(nullptr);
-
-    ALLOW_DEPRECATED_DECLARATIONS_BEGIN
-    if ([webView.get()->_configuration _relatedWebView] != m_uiDelegate->m_webView.get().get())
-        [NSException raise:NSInternalInconsistencyException format:@"Returned WKWebView was not created with the given configuration."];
-    ALLOW_DEPRECATED_DECLARATIONS_END
 
     // FIXME: Move this to WebPageProxy once rdar://134317255 and rdar://134317400 are resolved.
     if (openerInfo != webView.get()->_configuration->_pageConfiguration->openerInfo())

@@ -309,7 +309,7 @@ Page* WebChromeClient::createWindow(LocalFrame& frame, const WindowFeatures& fea
         newPage->mainFrame().setOpenerForWebKitLegacy(&frame);
     }
 
-    return newPage;
+    return features.wantsNoOpener() ? nullptr : newPage;
 }
 
 void WebChromeClient::show()

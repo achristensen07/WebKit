@@ -2591,18 +2591,16 @@ ExceptionOr<RefPtr<Frame>> LocalDOMWindow::createWindow(const String& urlString,
     if (!newFrame)
         return RefPtr<Frame> { nullptr };
 
-    bool noopener = windowFeatures.wantsNoOpener();
-    if (!noopener) {
-        ASSERT(newFrame->opener() == &openerFrame);
-        newFrame->page()->setOpenedByDOMWithOpener(true);
-    }
+    ASSERT(!windowFeatures.wantsNoOpener());
+    ASSERT(newFrame->opener() == &openerFrame);
+    newFrame->page()->setOpenedByDOMWithOpener(true);
 
     if (created)
         newFrame->protectedPage()->setOpenedByDOM();
 
     RefPtr localNewFrame = dynamicDowncast<LocalFrame>(newFrame);
     if (localNewFrame && localNewFrame->document()->protectedWindow()->isInsecureScriptAccess(activeWindow, completedURL.string()))
-        return noopener ? RefPtr<Frame> { nullptr } : newFrame;
+        return newFrame;
 
     if (prepareDialogFunction && localNewFrame)
         prepareDialogFunction(*localNewFrame->document()->protectedWindow());
@@ -2622,7 +2620,7 @@ ExceptionOr<RefPtr<Frame>> LocalDOMWindow::createWindow(const String& urlString,
     if (!newFrame->page())
         return RefPtr<Frame> { nullptr };
 
-    return noopener ? RefPtr<Frame> { nullptr } : newFrame;
+    return newFrame;
 }
 
 ExceptionOr<RefPtr<WindowProxy>> LocalDOMWindow::open(LocalDOMWindow& activeWindow, LocalDOMWindow& firstWindow, const String& urlStringToOpen, const AtomString& frameName, const String& windowFeaturesString)
