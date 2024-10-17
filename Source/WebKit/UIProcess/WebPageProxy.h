@@ -2533,7 +2533,8 @@ public:
     void didAdjustVisibilityWithSelectors(Vector<String>&&);
     BrowsingContextGroup& browsingContextGroup() const { return m_browsingContextGroup; }
 
-    WebPageProxyTesting* pageForTesting() const { return m_pageForTesting.get(); }
+    WebPageProxyTesting* pageForTesting() const;
+    RefPtr<WebPageProxyTesting> protectedPageForTesting() const;
 
     void hasActiveNowPlayingSessionChanged(bool);
 
@@ -3710,7 +3711,7 @@ private:
 #endif
 #endif
 
-    std::unique_ptr<WebPageProxyTesting> m_pageForTesting;
+    RefPtr<WebPageProxyTesting> m_pageForTesting;
 };
 
 } // namespace WebKit
