@@ -38,48 +38,51 @@ namespace WebCore {
 
 bool DocumentFullscreen::webkitFullscreenEnabled(Document& document)
 {
-    return document.fullscreenManager().isFullscreenEnabled();
+    return document.fullscreenManager()->isFullscreenEnabled(document);
 }
 
 Element* DocumentFullscreen::webkitFullscreenElement(Document& document)
 {
-    return document.ancestorElementInThisScope(document.fullscreenManager().protectedFullscreenElement().get());
+    return document.ancestorElementInThisScope(document.fullscreenManager()->protectedFullscreenElement().get());
 }
 
 bool DocumentFullscreen::webkitIsFullScreen(Document& document)
 {
-    return document.fullscreenManager().isFullscreen();
+    return document.fullscreenManager()->isFullscreen();
 }
 
 bool DocumentFullscreen::webkitFullScreenKeyboardInputAllowed(Document& document)
 {
-    return document.fullscreenManager().isFullscreenKeyboardInputAllowed();
+    return document.fullscreenManager()->isFullscreenKeyboardInputAllowed();
 }
 
 Element* DocumentFullscreen::webkitCurrentFullScreenElement(Document& document)
 {
-    return document.ancestorElementInThisScope(document.fullscreenManager().protectedFullscreenElement().get());
+    return document.ancestorElementInThisScope(document.fullscreenManager()->protectedFullscreenElement().get());
 }
 
 void DocumentFullscreen::webkitCancelFullScreen(Document& document)
 {
-    document.fullscreenManager().cancelFullscreen();
+    document.fullscreenManager()->cancelFullscreen();
 }
 
 // https://fullscreen.spec.whatwg.org/#exit-fullscreen
 void DocumentFullscreen::exitFullscreen(Document& document, RefPtr<DeferredPromise>&& promise)
 {
-    if (!document.isFullyActive() || !document.fullscreenManager().fullscreenElement()) {
+    if (!document.isFullyActive() || !document.fullscreenManager()->fullscreenElement()) {
         promise->reject(Exception { ExceptionCode::TypeError, "Not in fullscreen"_s });
         return;
     }
-    document.checkedFullscreenManager()->exitFullscreen(WTFMove(promise));
+    if (CheckedPtr manager = document.checkedFullscreenManager())
+        manager->exitFullscreen(document, WTFMove(promise));
 }
 
 void DocumentFullscreen::webkitExitFullscreen(Document& document)
 {
-    if (document.fullscreenManager().fullscreenElement())
-        document.checkedFullscreenManager()->exitFullscreen(nullptr);
+    if (document.fullscreenManager()->fullscreenElement()) {
+        if (CheckedPtr manager = document.checkedFullscreenManager())
+            manager->exitFullscreen(document, nullptr);
+    }
 }
 
 // https://fullscreen.spec.whatwg.org/#dom-document-fullscreenenabled
@@ -87,7 +90,9 @@ bool DocumentFullscreen::fullscreenEnabled(Document& document)
 {
     if (!document.isFullyActive())
         return false;
-    return document.checkedFullscreenManager()->isFullscreenEnabled();
+    if (CheckedPtr manager = document.checkedFullscreenManager())
+        return manager->isFullscreenEnabled(document);
+    return false;
 }
 
 } // namespace WebCore

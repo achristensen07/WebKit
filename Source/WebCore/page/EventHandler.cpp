@@ -3820,7 +3820,7 @@ bool EventHandler::needsKeyboardEventDisambiguationQuirks() const
 bool EventHandler::isKeyEventAllowedInFullScreen(const PlatformKeyboardEvent& keyEvent) const
 {
     RefPtr document = m_frame->document();
-    if (document->fullscreenManager().isFullscreenKeyboardInputAllowed())
+    if (document->fullscreenManager()->isFullscreenKeyboardInputAllowed())
         return true;
 
     if (keyEvent.type() == PlatformKeyboardEvent::Type::Char) {

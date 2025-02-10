@@ -123,6 +123,7 @@ class ElementTargetingController;
 class Element;
 class FocusController;
 class FormData;
+class FullscreenManager;
 class HTMLElement;
 class HTMLMediaElement;
 class HistoryItem;
@@ -398,7 +399,6 @@ public:
     void setAutofocusProcessed();
     bool autofocusProcessed() const;
     bool topDocumentHasDocumentClass(DocumentClass) const;
-    void setTopDocumentHasFullscreenElement(bool);
     WEBCORE_EXPORT bool topDocumentHasFullscreenElement();
 
     bool hasInjectedUserScript();
@@ -1304,6 +1304,13 @@ public:
     WEBCORE_EXPORT void setPresentingApplicationBundleIdentifier(String&&);
 #endif
 
+#if ENABLE(FULLSCREEN_API)
+    FullscreenManager* fullscreenManagerIfExists() { return m_fullscreenManager.get(); }
+    const FullscreenManager* fullscreenManagerIfExists() const { return m_fullscreenManager.get(); }
+    WEBCORE_EXPORT FullscreenManager& fullscreenManager();
+    WEBCORE_EXPORT const FullscreenManager& fullscreenManager() const;
+#endif
+
 private:
     explicit Page(PageConfiguration&&);
 
@@ -1749,6 +1756,9 @@ private:
 
 #if PLATFORM(COCOA)
     String m_presentingApplicationBundleIdentifier;
+#endif
+#if ENABLE(FULLSCREEN_API)
+    mutable std::unique_ptr<FullscreenManager> m_fullscreenManager;
 #endif
 }; // class Page
 

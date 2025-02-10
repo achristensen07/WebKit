@@ -274,7 +274,7 @@ public:
 
 #if ENABLE(FULLSCREEN_API)
         if (event.type() == eventNames().webkitfullscreenchangeEvent || event.type() == eventNames().fullscreenchangeEvent)
-            data->setBoolean("enabled"_s, !!node->document().fullscreenManager().fullscreenElement());
+            data->setBoolean("enabled"_s, !!node->document().fullscreenManager()->fullscreenElement());
 #endif // ENABLE(FULLSCREEN_API)
 
         auto timestamp = m_domAgent.m_environment.executionStopwatch().elapsedTime().seconds();

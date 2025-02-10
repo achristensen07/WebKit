@@ -428,7 +428,7 @@ ALWAYS_INLINE bool matchesFullscreenDocumentPseudoClass(const Element& element)
 ALWAYS_INLINE bool matchesInWindowFullscreenPseudoClass(const Element& element)
 {
 #if ENABLE(VIDEO)
-    if (&element != element.document().fullscreenManager().fullscreenElement())
+    if (element.document().fullscreenManager() && &element != element.document().fullscreenManager()->fullscreenElement())
         return false;
 
     auto* mediaElement = dynamicDowncast<HTMLMediaElement>(element);

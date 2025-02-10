@@ -1363,7 +1363,7 @@ void MediaElementSession::updateMediaUsageIfChanged()
     bool isOutsideOfFullscreen = false;
 #if ENABLE(FULLSCREEN_API)
     if (CheckedPtr fullscreenManager = document->fullscreenManagerIfExists()) {
-        if (RefPtr fullscreenElement = document->fullscreenManager().fullscreenElement())
+        if (RefPtr fullscreenElement = document->fullscreenManager()->fullscreenElement())
             isOutsideOfFullscreen = m_element.isDescendantOf(*fullscreenElement);
     }
 #endif

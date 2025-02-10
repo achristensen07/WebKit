@@ -892,19 +892,13 @@ bool Page::topDocumentHasDocumentClass(DocumentClass documentClass) const
     return m_topDocumentSyncData->documentClasses.contains(documentClass);
 }
 
-void Page::setTopDocumentHasFullscreenElement(bool hasFullscreenElement)
-{
-    if (hasFullscreenElement == m_topDocumentSyncData->hasFullscreenElement)
-        return;
-
-    m_topDocumentSyncData->hasFullscreenElement = hasFullscreenElement;
-    if (settings().siteIsolationEnabled())
-        processSyncClient().broadcastHasFullscreenElementToOtherProcesses(hasFullscreenElement);
-}
+// FIXME: Remove from sync data.
 
 bool Page::topDocumentHasFullscreenElement()
 {
-    return m_topDocumentSyncData->hasFullscreenElement;
+    if (!m_fullscreenManager)
+        return false;
+    return m_fullscreenManager->fullscreenElementIsInTopDocument();
 }
 
 bool Page::hasInjectedUserScript()
@@ -2164,8 +2158,9 @@ void Page::updateRendering()
     });
 
 #if ENABLE(FULLSCREEN_API)
-    runProcessingStep(RenderingUpdateStep::Fullscreen, [] (Document& document) {
-        document.fullscreenManager().dispatchPendingEvents();
+    runProcessingStep(RenderingUpdateStep::Fullscreen, [&] (Document& document) {
+        if (m_fullscreenManager)
+            m_fullscreenManager->dispatchPendingEvents(document);
     });
 #else
     m_renderingUpdateRemainingSteps.last().remove(RenderingUpdateStep::Fullscreen);
@@ -4258,7 +4253,7 @@ Document* Page::outermostFullscreenDocument() const
     RefPtr<Document> outermostFullscreenDocument;
     RefPtr currentDocument = localMainFrame->document();
     while (currentDocument) {
-        RefPtr fullscreenElement = currentDocument->fullscreenManager().fullscreenElement();
+        RefPtr fullscreenElement = currentDocument->fullscreenManager()->fullscreenElement();
         if (!fullscreenElement)
             break;
 
@@ -4274,6 +4269,23 @@ Document* Page::outermostFullscreenDocument() const
     return nullptr;
 #endif
 }
+
+#if ENABLE(FULLSCREEN_API)
+FullscreenManager& Page::fullscreenManager()
+{
+    if (!m_fullscreenManager)
+        m_fullscreenManager = makeUnique<FullscreenManager>(*this);
+    return *m_fullscreenManager;
+}
+
+const FullscreenManager& Page::fullscreenManager() const
+{
+    if (!m_fullscreenManager)
+        m_fullscreenManager = makeUnique<FullscreenManager>(const_cast<Page&>(*this));
+    return *m_fullscreenManager;
+}
+#endif
+
 
 void Page::disableICECandidateFiltering()
 {

@@ -7436,8 +7436,8 @@ void WebPage::elementDidFocus(Element& element, const FocusOptions& options)
 #if PLATFORM(IOS_FAMILY)
 
 #if ENABLE(FULLSCREEN_API)
-        if (element.document().fullscreenManager().isFullscreen())
-            element.document().fullscreenManager().cancelFullscreen();
+        if (element.document().fullscreenManager()->isFullscreen())
+            element.document().fullscreenManager()->cancelFullscreen();
 #endif
         if (isChangingFocusedElement && (m_userIsInteracting || m_keyboardIsAttached))
             m_sendAutocorrectionContextAfterFocusingElement = true;

@@ -3034,7 +3034,7 @@ void Element::removedFromAncestor(RemovalType removalType, ContainerNode& oldPar
 
 #if ENABLE(FULLSCREEN_API)
         if (UNLIKELY(hasFullscreenFlag()))
-            oldDocument->fullscreenManager().exitRemovedFullscreenElement(*this);
+            oldDocument->fullscreenManager()->exitRemovedFullscreenElement(*this);
 #endif
 
         if (UNLIKELY(isInTopLayer()))
@@ -4774,7 +4774,7 @@ void Element::webkitRequestFullscreen()
 // FIXME: Options are currently ignored.
 void Element::requestFullscreen(FullscreenOptions&&, RefPtr<DeferredPromise>&& promise)
 {
-    protectedDocument()->fullscreenManager().requestFullscreenForElement(*this, WTFMove(promise), FullscreenManager::EnforceIFrameAllowFullscreenRequirement);
+    protectedDocument()->fullscreenManager()->requestFullscreenForElement(*this, WTFMove(promise), FullscreenManager::EnforceIFrameAllowFullscreenRequirement);
 }
 
 void Element::setFullscreenFlag(bool flag)

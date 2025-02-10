@@ -1397,12 +1397,12 @@ public:
 #endif
 
 #if ENABLE(FULLSCREEN_API)
-    FullscreenManager* fullscreenManagerIfExists() { return m_fullscreenManager.get(); }
-    const FullscreenManager* fullscreenManagerIfExists() const { return m_fullscreenManager.get(); }
-    WEBCORE_EXPORT FullscreenManager& fullscreenManager();
-    WEBCORE_EXPORT const FullscreenManager& fullscreenManager() const;
-    CheckedRef<FullscreenManager> checkedFullscreenManager(); // Defined in DocumentInlines.h.
-    CheckedRef<const FullscreenManager> checkedFullscreenManager() const; // Defined in DocumentInlines.h.
+    WEBCORE_EXPORT FullscreenManager* fullscreenManagerIfExists();
+    WEBCORE_EXPORT const FullscreenManager* fullscreenManagerIfExists() const;
+    WEBCORE_EXPORT FullscreenManager* fullscreenManager();
+    WEBCORE_EXPORT const FullscreenManager* fullscreenManager() const;
+    CheckedPtr<FullscreenManager> checkedFullscreenManager();
+    CheckedPtr<const FullscreenManager> checkedFullscreenManager() const;
 #endif
 
 #if ENABLE(POINTER_LOCK)
@@ -2005,7 +2005,6 @@ private:
     VisitedLinkState& ensureVisitedLinkState();
     ScriptRunner& ensureScriptRunner();
     ScriptModuleLoader& ensureModuleLoader();
-    WEBCORE_EXPORT FullscreenManager& ensureFullscreenManager();
     inline DocumentFontLoader& fontLoader();
     Ref<DocumentFontLoader> protectedFontLoader();
     DocumentFontLoader& ensureFontLoader();

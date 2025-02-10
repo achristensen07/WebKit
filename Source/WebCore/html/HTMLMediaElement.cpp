@@ -7318,7 +7318,10 @@ void HTMLMediaElement::enterFullscreen(VideoFullscreenMode mode)
         m_waitingToEnterFullscreen = true;
         FullscreenManager::FullscreenCheckType fullscreenCheckType = m_ignoreFullscreenPermissionsPolicy ? FullscreenManager::ExemptIFrameAllowFullscreenRequirement : FullscreenManager::EnforceIFrameAllowFullscreenRequirement;
         m_ignoreFullscreenPermissionsPolicy = false;
-        protectedDocument()->checkedFullscreenManager()->requestFullscreenForElement(*this, nullptr, fullscreenCheckType, [weakThis = WeakPtr { *this }](bool success) {
+        CheckedPtr manager = protectedDocument()->checkedFullscreenManager();
+        if (!manager)
+            return;
+        manager->requestFullscreenForElement(*this, nullptr, fullscreenCheckType, [weakThis = WeakPtr { *this }](bool success) {
             RefPtr protectedThis = weakThis.get();
             if (!protectedThis || success)
                 return;
@@ -7387,10 +7390,11 @@ void HTMLMediaElement::exitFullscreen()
     m_waitingToEnterFullscreen = false;
 
 #if ENABLE(FULLSCREEN_API)
-    if (document().fullscreenManager().fullscreenElement() == this) {
-        if (document().fullscreenManager().isFullscreen()) {
+    if (document().fullscreenManager()->fullscreenElement() == this) {
+        if (document().fullscreenManager()->isFullscreen()) {
             m_changingVideoFullscreenMode = true;
-            protectedDocument()->checkedFullscreenManager()->cancelFullscreen();
+            if (CheckedPtr manager = protectedDocument()->checkedFullscreenManager())
+                manager->cancelFullscreen();
         }
 
         if (isInWindowOrStandardFullscreen(m_videoFullscreenMode))

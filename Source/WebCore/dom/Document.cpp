@@ -1010,15 +1010,6 @@ VisitedLinkState& Document::ensureVisitedLinkState()
     return *m_visitedLinkState;
 }
 
-#if ENABLE(FULLSCREEN_API)
-FullscreenManager& Document::ensureFullscreenManager()
-{
-    ASSERT(m_constructionDidFinish);
-    lazyInitialize(m_fullscreenManager, makeUnique<FullscreenManager>(*this));
-    return *m_fullscreenManager;
-}
-#endif
-
 Ref<SecurityOrigin> Document::protectedTopOrigin() const
 {
     return topOrigin();
@@ -8488,26 +8479,44 @@ void Document::addDefaultSpatialTrackingLabelChangedObserver(const DefaultSpatia
 #endif
 
 #if ENABLE(FULLSCREEN_API)
-FullscreenManager& Document::fullscreenManager()
+FullscreenManager* Document::fullscreenManager()
 {
-    if (!m_fullscreenManager)
-        return ensureFullscreenManager();
-    return *m_fullscreenManager;
+    RefPtr page = this->page();
+    if (!page)
+        return nullptr;
+    return &page->fullscreenManager();
 }
 
-const FullscreenManager& Document::fullscreenManager() const
+const FullscreenManager* Document::fullscreenManager() const
 {
-    if (!m_fullscreenManager)
-        return const_cast<Document&>(*this).ensureFullscreenManager();
-    return *m_fullscreenManager;
+    RefPtr page = this->page();
+    if (!page)
+        return nullptr;
+    return &page->fullscreenManager();
 }
 
-CheckedRef<FullscreenManager> Document::checkedFullscreenManager()
+FullscreenManager* Document::fullscreenManagerIfExists()
+{
+    RefPtr page = this->page();
+    if (!page)
+        return nullptr;
+    return page->fullscreenManagerIfExists();
+}
+
+const FullscreenManager* Document::fullscreenManagerIfExists() const
+{
+    RefPtr page = this->page();
+    if (!page)
+        return nullptr;
+    return page->fullscreenManagerIfExists();
+}
+
+CheckedPtr<FullscreenManager> Document::checkedFullscreenManager()
 {
     return fullscreenManager();
 }
 
-CheckedRef<const FullscreenManager> Document::checkedFullscreenManager() const
+CheckedPtr<const FullscreenManager> Document::checkedFullscreenManager() const
 {
     return fullscreenManager();
 }

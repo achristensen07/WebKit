@@ -298,7 +298,7 @@ static void setClipRectForWindow(NSWindow *window, NSRect clipRect)
 {
     if (!_element)
         return;
-    _element->document().fullscreenManager().cancelFullscreen();
+    _element->document().fullscreenManager()->cancelFullscreen();
 }
 
 - (void)exitFullScreen
@@ -441,7 +441,9 @@ ALLOW_DEPRECATED_DECLARATIONS_END
 
 - (WebCore::FullscreenManager*)_manager
 {
-    return &_element->document().fullscreenManager();
+    if (!_element->document().page())
+        return nullptr;
+    return &_element->document().page()->fullscreenManager();
 }
 
 - (void)_swapView:(NSView*)view with:(NSView*)otherView
