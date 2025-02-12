@@ -126,18 +126,6 @@ void WebFullScreenManagerProxy::didEnterFullScreen()
     }
 }
 
-void WebFullScreenManagerProxy::willExitFullScreen()
-{
-    ALWAYS_LOG(LOGIDENTIFIER);
-    RefPtr page = m_page.get();
-    if (!page)
-        return;
-
-    m_fullscreenState = FullscreenState::ExitingFullscreen;
-    page->fullscreenClient().willExitFullscreen(page.get());
-    sendToWebProcess(Messages::WebFullScreenManager::WillExitFullScreen());
-}
-
 void WebFullScreenManagerProxy::callCloseCompletionHandlers()
 {
     auto closeMediaCallbacks = WTFMove(m_closeCompletionHandlers);
@@ -273,13 +261,27 @@ void WebFullScreenManagerProxy::updateImageSource(FullScreenMediaDetails&& media
 }
 #endif // ENABLE(QUICKLOOK_FULLSCREEN)
 
-void WebFullScreenManagerProxy::exitFullScreen()
+void WebFullScreenManagerProxy::exitFullScreen(CompletionHandler<void(bool)>&& completionHandler)
 {
 #if ENABLE(QUICKLOOK_FULLSCREEN)
     m_imageBuffer = nullptr;
 #endif
-    if (CheckedPtr client = m_client)
-        client->exitFullScreen();
+    if (CheckedPtr client = m_client) {
+        client->exitFullScreen([weakThis = WeakPtr { *this }, completionHandler = WTFMove(completionHandler)] (bool success) mutable {
+            RefPtr protectedThis = weakThis.get();
+            if (!protectedThis)
+                return completionHandler(false);
+
+            if (success) {
+                protectedThis->m_fullscreenState = FullscreenState::ExitingFullscreen;
+                if (RefPtr page = protectedThis->m_page.get())
+                    page->fullscreenClient().willExitFullscreen(page.get());
+            }
+
+            completionHandler(success);
+        });
+    } else
+        completionHandler(false);
 }
 
 #if ENABLE(QUICKLOOK_FULLSCREEN)

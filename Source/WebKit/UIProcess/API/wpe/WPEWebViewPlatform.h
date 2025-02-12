@@ -52,8 +52,8 @@ public:
 #if ENABLE(FULLSCREEN_API)
     void enterFullScreen();
     void didEnterFullScreen();
-    void exitFullScreen();
-    void didExitFullScreen();
+    void exitFullScreen(CompletionHandler<void(bool)>&&);
+    void didExitFullScreen(CompletionHandler<void(bool)>&&);
     void requestExitFullScreen();
 #endif
 

@@ -328,7 +328,7 @@ void WebFullScreenManager::updateImageSource(WebCore::Element& element)
 }
 #endif // ENABLE(QUICKLOOK_FULLSCREEN)
 
-void WebFullScreenManager::exitFullScreenForElement(WebCore::Element* element)
+void WebFullScreenManager::exitFullScreenForElement(WebCore::Element* element, CompletionHandler<void(bool)>&& completionHandler)
 {
     if (element)
         ALWAYS_LOG(LOGIDENTIFIER, "<", element->tagName(), " id=\"", element->getIdAttribute(), "\">");
@@ -336,7 +336,11 @@ void WebFullScreenManager::exitFullScreenForElement(WebCore::Element* element)
         ALWAYS_LOG(LOGIDENTIFIER, "null");
 
     m_page->prepareToExitElementFullScreen();
-    m_page->send(Messages::WebFullScreenManagerProxy::ExitFullScreen());
+    m_page->sendWithAsyncReply(Messages::WebFullScreenManagerProxy::ExitFullScreen(), [this, protectedThis = Ref { *this }, completionHandler = WTFMove(completionHandler)] (bool success) mutable {
+        if (success)
+            willExitFullScreen();
+        completionHandler(success);
+    });
 
     if (m_inWindowFullScreenMode) {
         willExitFullScreen();

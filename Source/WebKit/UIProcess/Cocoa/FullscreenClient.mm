@@ -101,6 +101,7 @@ void FullscreenClient::didEnterFullscreen(WebPageProxy*)
 
 void FullscreenClient::willExitFullscreen(WebPageProxy*)
 {
+    // FIXME: This needs separate calls before and after the value changes.
     [m_webView willChangeValueForKey:@"fullscreenState"];
     [m_webView didChangeValueForKey:@"fullscreenState"];
 #if PLATFORM(MAC)
@@ -114,6 +115,7 @@ void FullscreenClient::willExitFullscreen(WebPageProxy*)
 
 void FullscreenClient::didExitFullscreen(WebPageProxy*)
 {
+    // FIXME: This needs separate calls before and after the value changes.
     [m_webView willChangeValueForKey:@"fullscreenState"];
     [m_webView didChangeValueForKey:@"fullscreenState"];
 #if PLATFORM(MAC)

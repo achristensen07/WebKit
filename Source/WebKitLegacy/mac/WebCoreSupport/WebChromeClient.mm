@@ -1058,7 +1058,7 @@ void WebChromeClient::enterFullScreenForElement(Element& element, HTMLMediaEleme
     completionHandler({ });
 }
 
-void WebChromeClient::exitFullScreenForElement(Element* element)
+void WebChromeClient::exitFullScreenForElement(Element* element, CompletionHandler<void(bool)>&& completionHandler)
 {
     SEL selector = @selector(webView:exitFullScreenForElement:listener:);
     if ([[m_webView UIDelegate] respondsToSelector:selector]) {
@@ -1069,6 +1069,7 @@ void WebChromeClient::exitFullScreenForElement(Element* element)
     else
         [m_webView _exitFullScreenForElement:element];
 #endif
+    completionHandler(true);
 }
 
 #endif // ENABLE(FULLSCREEN_API)

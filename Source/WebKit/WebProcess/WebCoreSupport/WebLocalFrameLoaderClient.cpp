@@ -560,7 +560,7 @@ void WebLocalFrameLoaderClient::dispatchDidStartProvisionalLoad()
 #if ENABLE(FULLSCREEN_API)
     auto* document = m_localFrame->document();
     if (document && document->fullscreenManager().fullscreenElement())
-        webPage->fullScreenManager().exitFullScreenForElement(webPage->fullScreenManager().element());
+        webPage->fullScreenManager().exitFullScreenForElement(webPage->fullScreenManager().element(), [] (bool) { });
 #endif
 
     webPage->findController().hideFindUI();

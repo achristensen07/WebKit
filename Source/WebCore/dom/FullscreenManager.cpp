@@ -287,7 +287,7 @@ void FullscreenManager::cancelFullscreen()
 
         // This triggers finishExitFullscreen with ExitMode::Resize, which fully exits the document.
         if (RefPtr fullscreenElement = mainFrameDocument->fullscreenManager().fullscreenElement())
-            mainFrameDocument->page()->chrome().client().exitFullScreenForElement(fullscreenElement.get());
+            mainFrameDocument->page()->chrome().client().exitFullScreenForElement(fullscreenElement.get(), [] (auto) { });
         else
             INFO_LOG(identifier, "Top document has no fullscreen element");
     });
@@ -376,9 +376,16 @@ void FullscreenManager::exitFullscreen(CompletionHandler<void(ExceptionOr<void>)
         m_pendingPromise = WTFMove(completionHandler);
 
         // Notify the chrome of the new full screen element.
-        if (mode == ExitMode::Resize)
-            page->chrome().client().exitFullScreenForElement(m_fullscreenElement.get());
-        else {
+        if (mode == ExitMode::Resize) {
+            page->chrome().client().exitFullScreenForElement(m_fullscreenElement.get(), [weakThis = WeakPtr { *this }] (bool success) {
+                if (weakThis) {
+                    if (success)
+                        weakThis->m_pendingPromise.resolve();
+                    else
+                        weakThis->m_pendingPromise.reject(Exception { ExceptionCode::InvalidStateError });
+                }
+            });
+        } else {
             finishExitFullscreen(protectedDocument(), ExitMode::NoResize);
 
             m_pendingFullscreenElement = fullscreenElement();
@@ -475,7 +482,7 @@ void FullscreenManager::willEnterFullscreen(Element& element, HTMLMediaElementEn
     // issue a cancel fullscreen request to the client
     if (m_pendingFullscreenElement != &element) {
         INFO_LOG(LOGIDENTIFIER, "Pending element mismatch; issuing exit fullscreen request");
-        page()->chrome().client().exitFullScreenForElement(&element);
+        page()->chrome().client().exitFullScreenForElement(&element, [] (bool) { });
         return completionHandler(Exception { ExceptionCode::TypeError, "Element requested for fullscreen has changed."_s });
     }
 

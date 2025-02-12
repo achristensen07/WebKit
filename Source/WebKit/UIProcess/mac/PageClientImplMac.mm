@@ -835,9 +835,9 @@ void PageClientImpl::enterFullScreen(CompletionHandler<void(bool)>&& completionH
     [m_impl->fullScreenWindowController() enterFullScreen:nil completionHandler:WTFMove(completionHandler)];
 }
 
-void PageClientImpl::exitFullScreen()
+void PageClientImpl::exitFullScreen(CompletionHandler<void(bool)>&& completionHandler)
 {
-    [m_impl->fullScreenWindowController() exitFullScreen];
+    [m_impl->fullScreenWindowController() exitFullScreen:WTFMove(completionHandler)];
 }
 
 void PageClientImpl::beganEnterFullScreen(const IntRect& initialFrame, const IntRect& finalFrame)

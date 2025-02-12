@@ -205,8 +205,8 @@ public:
     bool willEnterFullScreen(WKPageRef);
     static void beganEnterFullScreen(WKPageRef, WKRect initialFrame, WKRect finalFrame, const void*);
     void beganEnterFullScreen(WKPageRef, WKRect initialFrame, WKRect finalFrame);
-    static void exitFullScreen(WKPageRef, const void*);
-    void exitFullScreen(WKPageRef);
+    static bool exitFullScreen(WKPageRef, const void*);
+    bool exitFullScreen(WKPageRef);
     static void beganExitFullScreen(WKPageRef, WKRect initialFrame, WKRect finalFrame, const void*);
     void beganExitFullScreen(WKPageRef, WKRect initialFrame, WKRect finalFrame);
 

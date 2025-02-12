@@ -160,12 +160,10 @@ void View::willEnterFullScreen(CompletionHandler<void(bool)>&& completionHandler
     m_fullscreenState = WebFullScreenManagerProxy::FullscreenState::EnteringFullscreen;
 }
 
-void View::willExitFullScreen()
+void View::willExitFullScreen(CompletionHandler<void(bool)>&& completionHandler)
 {
     ASSERT(m_fullscreenState == WebFullScreenManagerProxy::FullscreenState::EnteringFullscreen || m_fullscreenState == WebFullScreenManagerProxy::FullscreenState::InFullscreen);
-
-    if (auto* fullScreenManagerProxy = page().fullScreenManager())
-        fullScreenManagerProxy->willExitFullScreen();
+    completionHandler(true);
     m_fullscreenState = WebFullScreenManagerProxy::FullscreenState::ExitingFullscreen;
 }
 #endif // ENABLE(FULLSCREEN_API)

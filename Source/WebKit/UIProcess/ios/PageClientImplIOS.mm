@@ -822,9 +822,11 @@ void PageClientImpl::updateImageSource()
 }
 #endif
 
-void PageClientImpl::exitFullScreen()
+void PageClientImpl::exitFullScreen(CompletionHandler<void(bool)>&& completionHandler)
 {
-    [[webView() fullScreenWindowController] exitFullScreen];
+    if (![webView() fullScreenWindowController])
+        return completionHandler(false);
+    [[webView() fullScreenWindowController] exitFullScreen:WTFMove(completionHandler)];
 }
 
 static UIInterfaceOrientationMask toUIInterfaceOrientationMask(WebCore::ScreenOrientationType orientation)

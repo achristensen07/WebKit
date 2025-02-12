@@ -2658,12 +2658,11 @@ static void webkitWebViewBaseDidEnterFullScreen(WebKitWebViewBase* webkitWebView
     priv->sleepDisabler = PAL::SleepDisabler::create(String::fromUTF8(_("Website running in fullscreen mode")), PAL::SleepDisabler::Type::Display);
 }
 
-void webkitWebViewBaseWillExitFullScreen(WebKitWebViewBase* webkitWebViewBase)
+void webkitWebViewBaseWillExitFullScreen(WebKitWebViewBase* webkitWebViewBase, CompletionHandler<void(bool)>&& completionHandler)
 {
     WebKitWebViewBasePrivate* priv = webkitWebViewBase->priv;
     ASSERT(priv->fullScreenState == WebFullScreenManagerProxy::FullscreenState::EnteringFullscreen || priv->fullScreenState == WebFullScreenManagerProxy::FullscreenState::InFullscreen);
-    if (auto* fullScreenManagerProxy = priv->pageProxy->fullScreenManager())
-        fullScreenManagerProxy->willExitFullScreen();
+    completionHandler(true);
     priv->fullScreenState = WebFullScreenManagerProxy::FullscreenState::ExitingFullscreen;
 }
 

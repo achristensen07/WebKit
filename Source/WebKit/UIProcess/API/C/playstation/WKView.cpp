@@ -107,12 +107,8 @@ void WKViewSetVisible(WKViewRef view, bool visible)
     setViewActivityStateFlag(view, WebCore::ActivityState::IsVisible, visible);
 }
 
-void WKViewWillEnterFullScreen(WKViewRef view)
+void WKViewWillEnterFullScreen(WKViewRef)
 {
-#if ENABLE(FULLSCREEN_API)
-    // FIXME: Replace this and WKViewSetViewClient's enterFullScreen with a listener object.
-    WebKit::toImpl(view)->willEnterFullScreen([] (bool) { });
-#endif
 }
 
 void WKViewDidEnterFullScreen(WKViewRef view)
@@ -122,11 +118,8 @@ void WKViewDidEnterFullScreen(WKViewRef view)
 #endif
 }
 
-void WKViewWillExitFullScreen(WKViewRef view)
+void WKViewWillExitFullScreen(WKViewRef)
 {
-#if ENABLE(FULLSCREEN_API)
-    WebKit::toImpl(view)->willExitFullScreen();
-#endif
 }
 
 void WKViewDidExitFullScreen(WKViewRef view)
@@ -174,16 +167,15 @@ void WKViewSetViewClient(WKViewRef view, const WKViewClientBase* client)
             if (!m_client.enterFullScreen)
                 return completionHandler(false);
             m_client.enterFullScreen(WebKit::toAPI(&view), m_client.base.clientInfo);
-
-            // FIXME: Replace this and WKViewWillEnterFullScreen with a listener object.
-            completionHandler(false);
+            completionHandler(true);
         }
         
-        void exitFullScreen(WebKit::PlayStationWebView& view)
+        void exitFullScreen(WebKit::PlayStationWebView& view, CompletionHandler<void(bool)>&& completionHandler)
         {
             if (!m_client.exitFullScreen)
                 return;
             m_client.exitFullScreen(WebKit::toAPI(&view), m_client.base.clientInfo);
+            completionHandler(true);
         }
         
         void closeFullScreen(WebKit::PlayStationWebView& view)

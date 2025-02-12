@@ -224,7 +224,7 @@ private:
     void closeFullScreenManager() override;
     bool isFullScreen() override;
     void enterFullScreen(CompletionHandler<void(bool)>&&) override;
-    void exitFullScreen() override;
+    void exitFullScreen(CompletionHandler<void(bool)>&&) override;
     void beganEnterFullScreen(const WebCore::IntRect& initialFrame, const WebCore::IntRect& finalFrame) override;
     void beganExitFullScreen(const WebCore::IntRect& initialFrame, const WebCore::IntRect& finalFrame) override;
 #endif

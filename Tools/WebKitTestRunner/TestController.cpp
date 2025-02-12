@@ -487,17 +487,16 @@ void TestController::beganEnterFullScreen(WKPageRef page, WKRect initialFrame, W
     WKPageDidEnterFullScreen(page);
 }
 
-void TestController::exitFullScreen(WKPageRef page, const void* clientInfo)
+bool TestController::exitFullScreen(WKPageRef page, const void* clientInfo)
 {
-    static_cast<TestController*>(const_cast<void*>(clientInfo))->exitFullScreen(page);
+    return static_cast<TestController*>(const_cast<void*>(clientInfo))->exitFullScreen(page);
 }
 
-void TestController::exitFullScreen(WKPageRef page)
+bool TestController::exitFullScreen(WKPageRef page)
 {
     if (m_dumpFullScreenCallbacks)
         protectedCurrentInvocation()->outputText("exitFullScreenForElement()\n"_s);
-
-    WKPageWillExitFullScreen(page);
+    return true;
 }
 
 void TestController::beganExitFullScreen(WKPageRef page, WKRect initialFrame, WKRect finalFrame, const void* clientInfo)

@@ -251,7 +251,7 @@ private:
 #if ENABLE(QUICKLOOK_FULLSCREEN)
     void updateImageSource() override;
 #endif
-    void exitFullScreen() override;
+    void exitFullScreen(CompletionHandler<void(bool)>&&) override;
     void beganEnterFullScreen(const WebCore::IntRect& initialFrame, const WebCore::IntRect& finalFrame) override;
     void beganExitFullScreen(const WebCore::IntRect& initialFrame, const WebCore::IntRect& finalFrame) override;
     bool lockFullscreenOrientation(WebCore::ScreenOrientationType) override;

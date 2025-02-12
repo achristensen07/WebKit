@@ -177,29 +177,28 @@ void ViewPlatform::didEnterFullScreen()
     m_fullscreenState = WebFullScreenManagerProxy::FullscreenState::InFullscreen;
 }
 
-void ViewPlatform::exitFullScreen()
+void ViewPlatform::exitFullScreen(CompletionHandler<void(bool)>&& completionHandler)
 {
     ASSERT(m_fullscreenState == WebFullScreenManagerProxy::FullscreenState::ExitingFullscreen);
 
     if (m_client->exitFullScreen(*this))
-        return;
+        return completionHandler(true);
 
     auto* toplevel = wpe_view_get_toplevel(m_wpeView.get());
     if (!viewToplevelIsFullScreen(toplevel) || m_viewWasAlreadyInFullScreen) {
-        didExitFullScreen();
+        didExitFullScreen(WTFMove(completionHandler));
         return;
     }
 
     if (toplevel)
         wpe_toplevel_unfullscreen(toplevel);
+    completionHandler(true);
 }
 
-void ViewPlatform::didExitFullScreen()
+void ViewPlatform::didExitFullScreen(CompletionHandler<void(bool)>&& completionHandler)
 {
     ASSERT(m_fullscreenState == WebFullScreenManagerProxy::FullscreenState::ExitingFullscreen);
-
-    if (auto* fullScreenManagerProxy = page().fullScreenManager())
-        fullScreenManagerProxy->didExitFullScreen();
+    completionHandler();
     m_fullscreenState = WebFullScreenManagerProxy::FullscreenState::NotInFullscreen;
 }
 

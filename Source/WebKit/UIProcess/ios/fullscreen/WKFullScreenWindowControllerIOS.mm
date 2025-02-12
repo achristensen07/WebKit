@@ -1282,17 +1282,17 @@ static constexpr NSString *kPrefersFullScreenDimmingKey = @"WebKitPrefersFullScr
     [self _exitFullscreenImmediately];
 }
 
-- (void)exitFullScreen
+- (void)exitFullScreen:(CompletionHandler<void(bool)>&&)completionHandler
 {
     if (_fullScreenState == WebKit::NotInFullScreen) {
         OBJC_ALWAYS_LOG(OBJC_LOGIDENTIFIER, _fullScreenState, ", dropping");
-        return;
+        return completionHandler(false);
     }
 
     if (_fullScreenState < WebKit::InFullScreen) {
         OBJC_ALWAYS_LOG(OBJC_LOGIDENTIFIER, _fullScreenState, " < InFullScreen");
         _exitRequested = YES;
-        return;
+        return completionHandler(false);
     }
 
 #if ENABLE(QUICKLOOK_FULLSCREEN)
@@ -1307,13 +1307,14 @@ static constexpr NSString *kPrefersFullScreenDimmingKey = @"WebKitPrefersFullScr
 
         if (auto* manager = self._manager) {
             OBJC_ALWAYS_LOG(OBJC_LOGIDENTIFIER);
-            manager->willExitFullScreen();
+            completionHandler(true);
             manager->didExitFullScreen();
             return;
         }
 
         OBJC_ERROR_LOG(OBJC_LOGIDENTIFIER, "manager missing");
         ASSERT_NOT_REACHED();
+        completionHandler(true);
         [self _exitFullscreenImmediately];
         return;
     }
@@ -1327,12 +1328,13 @@ static constexpr NSString *kPrefersFullScreenDimmingKey = @"WebKitPrefersFullScr
     if (auto* manager = self._manager) {
         OBJC_ALWAYS_LOG(OBJC_LOGIDENTIFIER);
         manager->setAnimatingFullScreen(true);
-        manager->willExitFullScreen();
+        completionHandler(true);
         return;
     }
 
     OBJC_ERROR_LOG(OBJC_LOGIDENTIFIER, "manager missing");
     ASSERT_NOT_REACHED();
+    completionHandler(true);
     [self _exitFullscreenImmediately];
 }
 
@@ -1642,7 +1644,6 @@ static constexpr NSString *kPrefersFullScreenDimmingKey = @"WebKitPrefersFullScr
     if (auto* manager = self._manager) {
         manager->requestExitFullScreen();
         manager->setAnimatingFullScreen(true);
-        manager->willExitFullScreen();
         manager->setAnimatingFullScreen(false);
         manager->didExitFullScreen();
     }

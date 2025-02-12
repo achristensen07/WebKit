@@ -59,7 +59,7 @@ typedef enum FullScreenState : NSInteger FullScreenState;
     RetainPtr<NSTimer> _watchdogTimer;
     RetainPtr<NSArray> _savedConstraints;
 
-    bool _requestedExitFullScreen;
+    CompletionHandler<void(bool)> _exitFullScreenCompletionHandler;
     FullScreenState _fullScreenState;
 
     double _savedScale;
@@ -77,7 +77,7 @@ typedef enum FullScreenState : NSInteger FullScreenState;
 - (BOOL)isFullScreen;
 
 - (void)enterFullScreen:(NSScreen *)screen completionHandler:(CompletionHandler<void(bool)>&&)completionHandler;
-- (void)exitFullScreen;
+- (void)exitFullScreen:(CompletionHandler<void(bool)>&&)completionHandler;
 - (void)exitFullScreenImmediately;
 - (void)requestExitFullScreen;
 - (void)close;

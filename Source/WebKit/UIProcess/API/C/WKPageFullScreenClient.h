@@ -35,7 +35,7 @@ typedef struct WKRect WKRect;
 
 typedef bool (*WKPageWillEnterFullScreenCallback)(WKPageRef page, const void* clientInfo);
 typedef void (*WKPageFullScreenCallbackWithRects)(WKPageRef page, WKRect initialFrame, WKRect finalFrame, const void* clientInfo);
-typedef void (*WKPageFullScreenCallback)(WKPageRef page, const void* clientInfo);
+typedef bool (*WKPageExitFullScreenCallback)(WKPageRef page, const void* clientInfo);
 
 typedef struct WKPageFullScreenClientBase {
     int version;
@@ -48,7 +48,7 @@ typedef struct WKPageFullScreenClientV0 {
     // Version 0.
     WKPageWillEnterFullScreenCallback willEnterFullScreen;
     WKPageFullScreenCallbackWithRects beganEnterFullScreen;
-    WKPageFullScreenCallback exitFullScreen;
+    WKPageExitFullScreenCallback exitFullScreen;
     WKPageFullScreenCallbackWithRects beganExitFullScreen;
 
 } WKPageFullScreenClientV0;

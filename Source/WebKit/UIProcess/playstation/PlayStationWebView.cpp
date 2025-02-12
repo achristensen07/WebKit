@@ -126,11 +126,6 @@ void PlayStationWebView::didEnterFullScreen()
     m_page->fullScreenManager()->didEnterFullScreen();
 }
 
-void PlayStationWebView::willExitFullScreen()
-{
-    m_page->fullScreenManager()->willExitFullScreen();
-}
-
 void PlayStationWebView::didExitFullScreen()
 {
     m_page->fullScreenManager()->didExitFullScreen();
@@ -163,10 +158,12 @@ void PlayStationWebView::enterFullScreen(CompletionHandler<void(bool)>&& complet
         completionHandler(false);
 }
 
-void PlayStationWebView::exitFullScreen()
+void PlayStationWebView::exitFullScreen(CompletionHandler<void(bool)>&& completionHandler)
 {
     if (m_client && isFullScreen())
-        m_client->exitFullScreen(*this);
+        m_client->exitFullScreen(*this, WTFMove(completionHandler));
+    else
+        completionHandler(false);
 }
 
 void PlayStationWebView::beganEnterFullScreen(const WebCore::IntRect& initialFrame, const WebCore::IntRect& finalFrame)

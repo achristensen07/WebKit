@@ -492,7 +492,7 @@ public:
 #if ENABLE(QUICKLOOK_FULLSCREEN)
     virtual void updateImageSource(Element&) { }
 #endif // ENABLE(QUICKLOOK_FULLSCREEN)
-    virtual void exitFullScreenForElement(Element*) { }
+    virtual void exitFullScreenForElement(Element*, CompletionHandler<void(bool)>&& completionHandler) { completionHandler(false); }
     virtual void setRootFullScreenLayer(GraphicsLayer*) { }
 #endif
 
