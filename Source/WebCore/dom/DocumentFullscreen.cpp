@@ -365,7 +365,7 @@ bool DocumentFullscreen::isSimpleFullscreenDocument() const
 static Vector<Ref<Document>> documentsToUnfullscreen(Frame& firstFrame)
 {
     Vector<Ref<Document>> documents;
-    for (RefPtr frame = &firstFrame; frame; frame = frame->tree().parent()) {
+    for (RefPtr frame = firstFrame; frame; frame = frame->tree().parent()) {
         RefPtr localFrame = dynamicDowncast<LocalFrame>(frame);
         if (!localFrame)
             continue;
