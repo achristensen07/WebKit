@@ -8421,7 +8421,6 @@ void WebPageProxy::createNewPage(IPC::Connection& connection, WindowFeatures&& w
     auto& originatingFrameInfoData = navigationActionData.originatingFrameInfoData;
     auto originatingPageID = navigationActionData.originatingPageID;
     auto& request = navigationActionData.request;
-    bool openedBlobURL = request.url().protocolIsBlob();
     MESSAGE_CHECK_BASE(originatingPageID, connection);
     MESSAGE_CHECK_BASE(WebFrameProxy::webFrame(originatingFrameInfoData.frameID), connection);
 
@@ -8450,7 +8449,6 @@ void WebPageProxy::createNewPage(IPC::Connection& connection, WindowFeatures&& w
         openerAppInitiatedState = WTFMove(openerAppInitiatedState),
         navigationDataForNewProcess = WTFMove(navigationDataForNewProcess),
         shouldOpenExternalURLsPolicy = navigationActionData.shouldOpenExternalURLsPolicy,
-        openedBlobURL,
         wantsNoOpener = windowFeatures.wantsNoOpener()
     ] (RefPtr<WebPageProxy> newPage) mutable {
         if (!newPage) {
@@ -8477,7 +8475,7 @@ void WebPageProxy::createNewPage(IPC::Connection& connection, WindowFeatures&& w
 
         newPage->m_shouldSuppressAppLinksInNextNavigationPolicyDecision = mainFrameURL.host() == request.url().host();
 
-        if (navigationDataForNewProcess && !openedBlobURL) {
+        if (navigationDataForNewProcess) {
             reply(std::nullopt, std::nullopt);
             newPage->loadRequest(WTFMove(request), shouldOpenExternalURLsPolicy, IsPerformingHTTPFallback::No, WTFMove(navigationDataForNewProcess));
             return;
