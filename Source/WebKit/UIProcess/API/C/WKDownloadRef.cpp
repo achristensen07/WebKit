@@ -64,7 +64,7 @@ void WKDownloadCancel(WKDownloadRef download, const void* functionContext, WKDow
 
 WKPageRef WKDownloadGetOriginatingPage(WKDownloadRef download)
 {
-    return toAPI(toImpl(download)->originatingPage());
+    return toAPI(toImpl(download)->originatingPage().get());
 }
 
 bool WKDownloadGetWasUserInitiated(WKDownloadRef download)

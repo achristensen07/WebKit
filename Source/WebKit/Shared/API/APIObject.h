@@ -27,7 +27,7 @@
 
 #include <wtf/RefCounted.h>
 #include <wtf/RefPtr.h>
-#include <wtf/ThreadSafeRefCounted.h>
+#include <wtf/ThreadSafeWeakPtr.h>
 
 #if PLATFORM(COCOA)
 #include "WKFoundation.h"
@@ -40,11 +40,15 @@
 
 #define DELEGATE_REF_COUNTING_TO_COCOA PLATFORM(COCOA)
 
+#if PLATFORM(COCOA)
+typedef struct objc_object* id;
+#endif
+
 namespace API {
 
 class Object
 #if !DELEGATE_REF_COUNTING_TO_COCOA
-    : public ThreadSafeRefCounted<Object>
+    : public ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr<Object>
 #endif
 {
     WTF_MAKE_NONCOPYABLE(Object);
@@ -248,6 +252,8 @@ public:
     }
 
     id wrapper() const { return (__bridge id)m_wrapper; }
+#else
+    id wrapper() const { return (id)const_cast<void*>(m_wrapper); }
 #endif
 
     void ref() const;

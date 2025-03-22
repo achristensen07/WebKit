@@ -26,6 +26,7 @@
 #pragma once
 
 #include "APIObject.h"
+#include "APIWeakPtr.h"
 #include "Connection.h"
 #include "DownloadID.h"
 #include "IdentifierTypes.h"
@@ -88,7 +89,7 @@ public:
     void didReceiveDownloadProxyMessage(IPC::Connection&, IPC::Decoder&);
     bool didReceiveSyncDownloadProxyMessage(IPC::Connection&, IPC::Decoder&, UniqueRef<IPC::Encoder>&);
 
-    WebPageProxy* originatingPage() const;
+    RefPtr<WebPageProxy> originatingPage() const;
 
     void setRedirectChain(Vector<URL>&& redirectChain) { m_redirectChain = WTFMove(redirectChain); }
     const Vector<URL>& redirectChain() const { return m_redirectChain; }
@@ -154,7 +155,7 @@ private:
     String m_suggestedFilename;
     String m_destinationFilename;
 
-    WeakPtr<WebPageProxy> m_originatingPage;
+    APIWeakPtr<WebPageProxy> m_originatingPage;
     Vector<URL> m_redirectChain;
     bool m_wasUserInitiated { true };
     bool m_downloadIsCancelled { false };

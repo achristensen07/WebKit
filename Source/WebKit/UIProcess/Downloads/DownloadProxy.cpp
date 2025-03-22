@@ -110,7 +110,7 @@ void DownloadProxy::processDidClose()
     m_client->processDidCrash(*this);
 }
 
-WebPageProxy* DownloadProxy::originatingPage() const
+RefPtr<WebPageProxy> DownloadProxy::originatingPage() const
 {
     return m_originatingPage.get();
 }
