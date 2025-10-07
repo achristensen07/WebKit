@@ -23,7 +23,7 @@
 
 // FIXME: Eliminate this file since the refined API can now just go with the rest of the normal API where it belongs.
 
-#if !os(tvOS) && !os(watchOS)
+#if USE_APPLE_INTERNAL_SDK || (!os(tvOS) && !os(watchOS))
 
 // Older versions of the Swift compiler fail to import WebKit_Private. Can be
 // removed when WebKit drops support for macOS Sonoma.
