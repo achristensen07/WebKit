@@ -183,6 +183,33 @@ TEST(KeyboardEventTests, UserTextInputEvent)
     EXPECT_WK_STREQ([webView _test_waitForAlert], "input without webkitusertextinput textarea");
 }
 
+TEST(KeyboardEventTests, PrependEventListener)
+{
+    RetainPtr webView = adoptNS([TestWKWebView new]);
+
+    __block Vector<RetainPtr<NSString>> alerts;
+    RetainPtr delegate = adoptNS([TestUIDelegate new]);
+    delegate.get().runJavaScriptAlertPanelWithMessage = ^(WKWebView *, NSString *message, WKFrameInfo *, void (^completionHandler)(void)) {
+        alerts.append(message);
+        completionHandler();
+    };
+    webView.get().UIDelegate = delegate.get();
+
+    RetainPtr configuration = adoptNS([_WKContentWorldConfiguration new]);
+    configuration.get().allowAutofill = YES;
+    RetainPtr autofillWorld = [WKContentWorld _worldWithConfiguration:configuration.get()];
+    NSString *js = @""
+        "window.addEventListener('keydown', (e) => { alert('regular ' + e.key + ' ' + e.customProperty); e.customProperty = 'foo' });"
+        "window.prependEventListener('keydown', (e) => { alert('prepended ' + e.key + ' ' + e.customProperty); e.customProperty = 'bar' });";
+    [webView objectByEvaluatingJavaScript:js inFrame:nil inContentWorld:autofillWorld.get()];
+
+    [webView typeCharacter:'a'];
+    while (alerts.size() < 2u)
+        Util::spinRunLoop();
+    EXPECT_WK_STREQ(alerts[0].get(), "prepended a undefined");
+    EXPECT_WK_STREQ(alerts[1].get(), "regular a bar");
+}
+
 } // namespace TestWebKitAPI
 
 #endif // PLATFORM(MAC)

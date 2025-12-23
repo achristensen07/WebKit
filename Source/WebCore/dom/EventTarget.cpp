@@ -88,6 +88,12 @@ bool EventTarget::isPaymentRequest() const
     return false;
 }
 
+void EventTarget::prependEventListener(const AtomString& eventType, RefPtr<EventListener>&& listener, AddEventListenerOptionsOrBoolean&& variant)
+{
+    addEventListenerForBindings(eventType, WTF::move(listener), WTF::move(variant));
+    ensureEventTargetData().eventListenerMap.moveLastListenerToFirst(eventType);
+}
+
 bool EventTarget::addEventListener(const AtomString& eventType, Ref<EventListener>&& listener, const AddEventListenerOptions& options)
 {
 #if ASSERT_ENABLED

@@ -98,6 +98,7 @@
 
 
     // Non-standard
+    [EnabledForWorld=allowAutofill] undefined prependEventListener([AtomString] DOMString type, EventListener? listener, optional (AddEventListenerOptions or boolean) options = false);
     [Replaceable, CustomGetter] readonly attribute Event event;
     boolean find(optional DOMString string, optional boolean caseSensitive = false, optional boolean backwards = false, optional boolean wrap = false, optional boolean wholeWord = false, optional boolean searchInFrames = false, optional boolean showDialog = false);
     [Replaceable] readonly attribute  boolean offscreenBuffering;

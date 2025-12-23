@@ -697,6 +697,7 @@ namespace WebCore {
     macro(parent) \
     macro(pendingPullIntos) \
     macro(postMessage) \
+    macro(prependEventListener) \
     macro(privateGetStats) \
     macro(pull) \
     macro(pullAgain) \

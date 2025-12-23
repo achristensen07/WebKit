@@ -103,6 +103,7 @@ public:
     void addEventListenerForBindings(const AtomString& eventType, RefPtr<EventListener>&&, AddEventListenerOptionsOrBoolean&&);
     using EventListenerOptionsOrBoolean = Variant<EventListenerOptions, bool>;
     void removeEventListenerForBindings(const AtomString& eventType, RefPtr<EventListener>&&, EventListenerOptionsOrBoolean&&);
+    void prependEventListener(const AtomString& eventType, RefPtr<EventListener>&&, AddEventListenerOptionsOrBoolean&&);
     ExceptionOr<bool> dispatchEventForBindings(Event&);
 
     virtual bool addEventListener(const AtomString& eventType, Ref<EventListener>&&, const AddEventListenerOptions&);

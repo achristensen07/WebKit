@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <WebCore/AddEventListenerOptionsInlines.h>
 #include <WebCore/EventTarget.h>
 #include <WebCore/JSDOMWrapper.h>
 #include <WebCore/JSEventTarget.h>

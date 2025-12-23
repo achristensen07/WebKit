@@ -75,6 +75,7 @@ public:
 
     void replace(const AtomString& eventType, EventListener& oldListener, Ref<EventListener>&& newListener, const RegisteredEventListener::Options&);
     bool add(const AtomString& eventType, Ref<EventListener>&&, const RegisteredEventListener::Options&);
+    void moveLastListenerToFirst(const AtomString& eventType);
     bool remove(const AtomString& eventType, EventListener&, bool useCapture);
     WEBCORE_EXPORT EventListenerVector* find(const AtomString& eventType);
     const EventListenerVector* find(const AtomString& eventType) const { return const_cast<EventListenerMap*>(this)->find(eventType); }
@@ -116,6 +117,7 @@ private:
             m_threadUID = Thread::currentSingleton().uid();
     }
 
+    // FIXME: m_entries should probably have WTF_GUARDED_BY_LOCK(m_lock);
     Vector<std::pair<AtomString, EventListenerVector>, 0, CrashOnOverflow, 4> m_entries;
     Lock m_lock;
     uint32_t m_threadUID { 0 };

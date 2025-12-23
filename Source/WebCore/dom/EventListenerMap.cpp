@@ -116,6 +116,23 @@ void EventListenerMap::replace(const AtomString& eventType, EventListener& oldLi
     registeredListener = RegisteredEventListener::create(WTF::move(newListener), options);
 }
 
+void EventListenerMap::moveLastListenerToFirst(const AtomString& eventType)
+{
+    // This is only used for autofill worlds and is never used repeatedly, so it isn't worth the overhead
+    // of using a Deque to prevent O(n^2) algorithms from using this repeatedly.
+    auto* vectorPointer = find(eventType);
+    if (!vectorPointer || vectorPointer->isEmpty()) {
+        ASSERT_NOT_REACHED();
+        return;
+    }
+    auto& vector = *vectorPointer;
+    RefPtr last = vector.last();
+    for (size_t i = vector.size(); i >= 2; --i)
+        vector[i - 1] = WTF::move(vector[i - 2]);
+    ASSERT(!vector[0]);
+    vector[0] = WTF::move(last);
+}
+
 bool EventListenerMap::add(const AtomString& eventType, Ref<EventListener>&& listener, const RegisteredEventListener::Options& options)
 {
     releaseAssertOrSetThreadUID();
