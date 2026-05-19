@@ -30,7 +30,6 @@
 #include "HTTPStatusCodes.h"
 #include "IPAddressSpace.h"
 #include "Logging.h"
-#include "PublicSuffixStore.h"
 #include "RegistrableDomain.h"
 #include "ResourceRequest.h"
 #include "ResourceResponse.h"
@@ -73,8 +72,6 @@ void ResourceRequestBase::setAsIsolatedCopy(const ResourceRequest& other)
     setPriority(other.priority());
     setRequester(other.requester());
     setInitiatorIdentifier(other.initiatorIdentifier().isolatedCopy());
-    setCachePartition(other.cachePartition().isolatedCopy());
-
     if (auto inspectorInitiatorNodeIdentifier = other.inspectorInitiatorNodeIdentifier())
         setInspectorInitiatorNodeIdentifier(*inspectorInitiatorNodeIdentifier);
 
@@ -860,25 +857,16 @@ unsigned initializeMaximumHTTPConnectionCountPerHost()
 }
 #endif
 
-void ResourceRequestBase::setCachePartition(const String& cachePartition)
+String ResourceRequestBase::cachePartition() const
 {
 #if ENABLE(CACHE_PARTITIONING)
-    ASSERT(!cachePartition.isNull());
-    ASSERT(cachePartition == partitionName(cachePartition));
-    m_cachePartition = cachePartition;
+    RegistrableDomain domain(firstPartyForCookies());
+    if (domain.isEmpty())
+        return emptyString();
+    return domain.string();
 #else
-    UNUSED_PARAM(cachePartition);
+    return emptyString();
 #endif
-}
-
-String ResourceRequestBase::partitionName(const String& domain)
-{
-    if (domain.isNull())
-        return emptyString();
-    auto highLevel = PublicSuffixStore::singleton().topPrivatelyControlledDomain(domain);
-    if (highLevel.isNull())
-        return emptyString();
-    return highLevel;
 }
 
 bool ResourceRequestBase::isThirdParty() const

@@ -662,7 +662,6 @@ ExceptionOr<void> XMLHttpRequest::createRequest()
                 return Exception { ExceptionCode::NetworkError };
         }
 
-        request.setDomainForCachePartition(context->domainForCachePartition());
         InspectorInstrumentation::willLoadXHRSynchronously(context.ptr());
         ThreadableLoader::loadResourceSynchronously(context, WTF::move(request), *this, options);
         InspectorInstrumentation::didLoadXHRSynchronously(context.ptr());

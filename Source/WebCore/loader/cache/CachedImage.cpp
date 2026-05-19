@@ -87,7 +87,7 @@ CachedImage::CachedImage(Image* image, PAL::SessionID sessionID, const CookieJar
 {
 }
 
-CachedImage::CachedImage(const URL& url, Image* image, PAL::SessionID sessionID, const CookieJar* cookieJar, const String& domainForCachePartition)
+CachedImage::CachedImage(const URL& url, Image* image, PAL::SessionID sessionID, const CookieJar* cookieJar, const String& firstPartyForCookies)
     : CachedResource(url, Type::ImageResource, sessionID, cookieJar)
     , m_image(image)
     , m_updateImageDataCount(0)
@@ -95,7 +95,7 @@ CachedImage::CachedImage(const URL& url, Image* image, PAL::SessionID sessionID,
     , m_shouldPaintBrokenImage(true)
     , m_forceUpdateImageDataEnabledForTesting(false)
 {
-    m_resourceRequest.setDomainForCachePartition(domainForCachePartition);
+    m_resourceRequest.setFirstPartyForCookies(URL { firstPartyForCookies });
 
     // Use the incoming URL in the response field. This ensures that code using the response directly,
     // such as origin checks for security, actually see something.

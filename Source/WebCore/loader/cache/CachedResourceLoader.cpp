@@ -315,9 +315,6 @@ CachedResourceHandle<CachedCSSStyleSheet> CachedResourceLoader::requestUserCSSSt
     request.setDestinationIfNotSet(FetchOptions::Destination::Style);
 
     ASSERT(document());
-    if (RefPtr document = this->document())
-        request.setDomainForCachePartition(*document);
-
     Ref memoryCache = MemoryCache::singleton();
     if (request.allowsCaching()) {
         if (RefPtr existing = memoryCache->resourceForRequest(request.resourceRequest(), page.sessionID())) {
@@ -1265,7 +1262,6 @@ ResourceErrorOr<Ref<CachedResource>> CachedResourceLoader::requestResource(Cache
     RefPtr<CachedResource> resource;
     CheckedPtr<ContentSecurityPolicy> contentSecurityPolicy;
     if (document) {
-        request.setDomainForCachePartition(*document);
         request.resourceRequest().setFirstPartyForCookies(document->firstPartyForCookies());
         contentSecurityPolicy = document->contentSecurityPolicy();
     }

@@ -124,7 +124,7 @@ void DOMURL::revokeObjectURL(ScriptExecutionContext& scriptExecutionContext, con
 {
     URL url { urlString };
     ResourceRequest request(WTF::move(url));
-    request.setDomainForCachePartition(scriptExecutionContext.domainForCachePartition());
+    request.setFirstPartyForCookies(protect(scriptExecutionContext.topOrigin())->toURL());
 
     MemoryCache::removeRequestFromSessionCaches(scriptExecutionContext, request);
 

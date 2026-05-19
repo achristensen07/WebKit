@@ -1552,9 +1552,9 @@ void NetworkResourceLoader::continueWillSendRequest(ResourceRequest&& newRequest
 
     m_isAllowedToAskUserForCredentials = isAllowedToAskUserForCredentials;
 
-    // If there is a match in the network cache, we need to reuse the original cache policy and partition.
+    // If there is a match in the network cache, we need to reuse the original cache policy and first party for cookies.
+    newRequest.setFirstPartyForCookies(originalRequest().firstPartyForCookies());
     newRequest.setCachePolicy(originalRequest().cachePolicy());
-    newRequest.setCachePartition(originalRequest().cachePartition());
 
     if (m_isWaitingContinueWillSendRequestForCachedRedirect) {
         m_isWaitingContinueWillSendRequestForCachedRedirect = false;

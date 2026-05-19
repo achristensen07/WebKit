@@ -772,7 +772,7 @@ RefPtr<LegacyWebArchive> LegacyWebArchive::createInternal(const String& markupSt
                 auto resource = documentLoader->subresource(subresourceURL);
                 if (!resource) {
                     ResourceRequest request(URL { subresourceURL });
-                    request.setDomainForCachePartition(frame.document()->domainForCachePartition());
+                    request.setFirstPartyForCookies(frame.document()->firstPartyForCookies());
                     if (RefPtr cachedResource = MemoryCache::singleton().resourceForRequest(request, frame.page()->sessionID()))
                         resource = ArchiveResource::create(cachedResource->resourceBuffer(), subresourceURL, cachedResource->response());
                 }

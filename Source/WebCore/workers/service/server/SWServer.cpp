@@ -716,7 +716,6 @@ ResourceRequest SWServer::createScriptRequest(const URL& url, const ServiceWorke
     auto topOrigin = jobData.topOrigin.securityOrigin();
     auto origin = SecurityOrigin::create(jobData.scriptURL);
 
-    request.setDomainForCachePartition(jobData.domainForCachePartition);
     request.setAllowCookies(true);
     request.setFirstPartyForCookies(topOrigin->toURL());
 

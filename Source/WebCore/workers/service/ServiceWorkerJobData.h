@@ -40,7 +40,7 @@ struct ServiceWorkerJobData {
     using Identifier = ServiceWorkerJobDataIdentifier;
     ServiceWorkerJobData(SWServerConnectionIdentifier, const ServiceWorkerOrClientIdentifier& sourceContext);
     ServiceWorkerJobData(Identifier, const ServiceWorkerOrClientIdentifier& sourceContext);
-    WEBCORE_EXPORT ServiceWorkerJobData(WebCore::ServiceWorkerJobDataIdentifier&&, URL&& scriptURL, URL&& clientCreationURL, WebCore::SecurityOriginData&& topOrigin, URL&& scopeURL, WebCore::ServiceWorkerOrClientIdentifier&& sourceContext, WebCore::WorkerType, WebCore::ServiceWorkerJobType, String&& domainForCachePartition, bool isFromServiceWorkerPage, std::optional<WebCore::ServiceWorkerRegistrationOptions>&&);
+    WEBCORE_EXPORT ServiceWorkerJobData(WebCore::ServiceWorkerJobDataIdentifier&&, URL&& scriptURL, URL&& clientCreationURL, WebCore::SecurityOriginData&& topOrigin, URL&& scopeURL, WebCore::ServiceWorkerOrClientIdentifier&& sourceContext, WebCore::WorkerType, WebCore::ServiceWorkerJobType, bool isFromServiceWorkerPage, std::optional<WebCore::ServiceWorkerRegistrationOptions>&&);
 
     SWServerConnectionIdentifier connectionIdentifier() const { return m_identifier.connectionIdentifier; }
 
@@ -54,7 +54,6 @@ struct ServiceWorkerJobData {
     ServiceWorkerOrClientIdentifier sourceContext;
     WorkerType workerType;
     ServiceWorkerJobType type;
-    String domainForCachePartition;
     bool isFromServiceWorkerPage { false };
 
     std::optional<ServiceWorkerRegistrationOptions> registrationOptions;
