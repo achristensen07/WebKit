@@ -1,2 +1,3 @@
-nosniff-html.html has MIME type application/octet-stream
 
+html-with-nosniff-html.html has MIME type text/html
+nosniff-html.html has MIME type application/octet-stream

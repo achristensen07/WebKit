@@ -1650,10 +1650,13 @@ bool TestController::resetStateToConsistentValues(const TestOptions& options, Re
     m_downloadIndex = 0;
     m_shouldDownloadContentDispositionAttachments = true;
     m_dumpPolicyDelegateCallbacks = false;
+    m_dumpResourceResponseMIMETypes = false;
     m_dumpFullScreenCallbacks = false;
 
     WKPageSetResourceLoadClient(m_mainWebView->page(), nullptr);
     m_dumpAllHTTPRedirectedResponseHeaders = false;
+    m_hasResourceLoadClient = false;
+    m_dumpResourceLoadCallbacks = false;
 
     m_waitBeforeFinishingFullscreenExit = false;
     m_scrollDuringEnterFullscreen = false;
@@ -1753,50 +1756,111 @@ static inline void dumpErrorDescriptionSuitableForTestResult(WKErrorRef error, S
     stringBuilder.append('>');
 }
 
+void TestController::dumpResourceResponseMIMETypes()
+{
+    m_dumpResourceResponseMIMETypes = true;
+    installResourceLoadClient();
+}
+
 void TestController::dumpResourceLoadCallbacks()
 {
+    m_dumpResourceLoadCallbacks = true;
+    installResourceLoadClient();
+}
+
+void TestController::didSendRequest(WKPageRef page, WKURLRequestRef request)
+{
+    if (m_state != RunningTest)
+        return;
+
+    if (m_dumpResourceLoadCallbacks) {
+        WKRetainPtr url = adoptWK(WKURLRequestCopyURL(request));
+        StringBuilder stringBuilder;
+        stringBuilder.append(pathSuitableForTestResult(url.get(), page));
+        stringBuilder.append(" - willSendRequest "_s, string(request, page), " redirectResponse (null)\n"_s);
+        currentInvocation()->outputResourceLoadCallback(stringBuilder.toString());
+    }
+}
+
+#if !PLATFORM(COCOA)
+String TestController::platformResponseMIMEType(WKURLResponseRef response)
+{
+    return { };
+}
+#endif
+
+void TestController::didPerformRedirect(WKPageRef page, WKURLResponseRef response, WKURLRequestRef request)
+{
+    if (m_dumpResourceLoadCallbacks) {
+        WKRetainPtr url = adoptWK(WKURLRequestCopyURL(request));
+        StringBuilder stringBuilder;
+        stringBuilder.append(pathSuitableForTestResult(url.get(), page));
+        stringBuilder.append(" - willSendRequest "_s, string(request, page), " redirectResponse "_s, string(response, page, m_dumpAllHTTPRedirectedResponseHeaders), "\n"_s);
+        currentInvocation()->outputResourceLoadCallback(stringBuilder.toString());
+    }
+}
+
+void TestController::didReceiveResponse(WKPageRef page, WKURLRef originalURL, WKURLResponseRef response)
+{
+    if (m_dumpResourceLoadCallbacks) {
+        StringBuilder stringBuilder;
+        stringBuilder.append(pathSuitableForTestResult(originalURL, page));
+        stringBuilder.append(" - didReceiveResponse "_s, string(response, page), '\n');
+        currentInvocation()->outputResourceLoadCallback(stringBuilder.toString());
+    }
+
+    if (m_dumpResourceResponseMIMETypes) {
+        WKRetainPtr url = adoptWK(WKURLResponseCopyURL(response));
+        WKRetainPtr urlString = adoptWK(WKURLCopyLastPathComponent(url.get()));
+        WKRetainPtr mimeTypeString = adoptWK(WKURLResponseCopyMIMEType(response));
+
+        StringBuilder stringBuilder;
+        stringBuilder.append(urlString.get(), " has MIME type "_s, mimeTypeString.get());
+
+        String platformMIMEType = platformResponseMIMEType(response);
+        if (!platformMIMEType.isEmpty() && platformMIMEType != toWTFString(mimeTypeString))
+            stringBuilder.append(" but platform response has "_s, platformMIMEType);
+
+        stringBuilder.append('\n');
+        currentInvocation()->outputResourceLoadCallback(stringBuilder.toString());
+    }
+}
+
+void TestController::didCompleteWithError(WKPageRef page, WKURLRef originalURL, WKURLResponseRef response, WKErrorRef error)
+{
+    if (m_dumpResourceLoadCallbacks) {
+        StringBuilder stringBuilder;
+        stringBuilder.append(pathSuitableForTestResult(originalURL, page));
+        if (error) {
+            stringBuilder.append(" - didFailLoadingWithError: "_s);
+            dumpErrorDescriptionSuitableForTestResult(error, stringBuilder);
+            stringBuilder.append('\n');
+        } else
+            stringBuilder.append(" - didFinishLoading\n"_s);
+        currentInvocation()->outputResourceLoadCallback(stringBuilder.toString());
+    }
+}
+
+void TestController::installResourceLoadClient()
+{
+    if (m_hasResourceLoadClient)
+        return;
+
     WKPageResourceLoadClientV0 client {
         { 0, nullptr },
-        [] (const void* clientInfo, WKPageRef page, WKURLRequestRef request) {
-            auto& controller = TestController::singleton();
-            if (controller.m_state != RunningTest)
-                return;
-
-            WKRetainPtr url = adoptWK(WKURLRequestCopyURL(request));
-            StringBuilder stringBuilder;
-            stringBuilder.append(pathSuitableForTestResult(url.get(), page));
-            stringBuilder.append(" - willSendRequest "_s, string(request, page),
-                " redirectResponse (null)\n"_s);
-            controller.currentInvocation()->outputResourceLoadCallback(stringBuilder.toString());
-        }, [] (const void* clientInfo, WKPageRef page, WKURLResponseRef response, WKURLRequestRef request) {
-            auto& controller = TestController::singleton();
-
-            WKRetainPtr url = adoptWK(WKURLRequestCopyURL(request));
-            StringBuilder stringBuilder;
-            stringBuilder.append(pathSuitableForTestResult(url.get(), page));
-            stringBuilder.append(" - willSendRequest "_s, string(request, page),
-                " redirectResponse "_s, string(response, page, controller.m_dumpAllHTTPRedirectedResponseHeaders), "\n"_s);
-            controller.currentInvocation()->outputResourceLoadCallback(stringBuilder.toString());
-        }, [] (const void* clientInfo, WKPageRef page, WKURLRef originalURL, WKURLResponseRef response) {
-            StringBuilder stringBuilder;
-            stringBuilder.append(pathSuitableForTestResult(originalURL, page));
-            stringBuilder.append(" - didReceiveResponse "_s, string(response, page), '\n');
-            TestController::singleton().currentInvocation()->outputResourceLoadCallback(stringBuilder.toString());
-        }, [] (const void* clientInfo, WKPageRef page, WKURLRef originalURL, WKURLResponseRef response, WKErrorRef error) {
-            auto& controller = TestController::singleton();
-            StringBuilder stringBuilder;
-            stringBuilder.append(pathSuitableForTestResult(originalURL, page));
-            if (error) {
-                stringBuilder.append(" - didFailLoadingWithError: "_s);
-                dumpErrorDescriptionSuitableForTestResult(error, stringBuilder);
-                stringBuilder.append('\n');
-            } else
-                stringBuilder.append(" - didFinishLoading\n"_s);
-            controller.currentInvocation()->outputResourceLoadCallback(stringBuilder.toString());
+        [] (const void*, WKPageRef page, WKURLRequestRef request) {
+            TestController::singleton().didSendRequest(page, request);
+        }, [] (const void*, WKPageRef page, WKURLResponseRef response, WKURLRequestRef request) {
+            TestController::singleton().didPerformRedirect(page, response, request);
+        }, [] (const void*, WKPageRef page, WKURLRef originalURL, WKURLResponseRef response) {
+            TestController::singleton().didReceiveResponse(page, originalURL, response);
+        }, [] (const void*, WKPageRef page, WKURLRef originalURL, WKURLResponseRef response, WKErrorRef error) {
+            TestController::singleton().didCompleteWithError(page, originalURL, response, error);
         }
     };
 
     WKPageSetResourceLoadClient(m_mainWebView->page(), &client.base);
+    m_hasResourceLoadClient = true;
 }
 
 void TestController::updateLiveDocumentsAfterTest()

@@ -1,2 +1,3 @@
-png-with-text-content-type.cgi has MIME type image/png
 
+mime-type-sniff.html has MIME type text/html
+png-with-text-content-type.cgi has MIME type image/png

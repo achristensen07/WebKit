@@ -187,6 +187,8 @@ void TestInvocation::invoke()
     testController.setShouldLogHistoryClientCallbacks(shouldLogHistoryClientCallbacks());
     if (m_options.shouldDumpResourceLoadCallbacks())
         testController.dumpResourceLoadCallbacks();
+    if (m_options.shouldDumpResourceResponseMIMETypes())
+        testController.dumpResourceResponseMIMETypes();
 
     WKHTTPCookieStoreSetHTTPCookieAcceptPolicy(WKWebsiteDataStoreGetHTTPCookieStore(testController.websiteDataStore()), kWKHTTPCookieAcceptPolicyOnlyFromMainDocumentDomain, nullptr, nullptr);
 

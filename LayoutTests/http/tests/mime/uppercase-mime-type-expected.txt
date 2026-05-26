@@ -1,2 +1,3 @@
-uppercase-mime-type.py has MIME type text/html
 If this text is shown, that means the new document was successfully loaded.
+uppercase-mime-type.html has MIME type text/html
+uppercase-mime-type.py has MIME type text/html

@@ -218,7 +218,7 @@ public:
     void addResourceLoadCallback(std::string);
     void dumpResourceLoadCallbacks();
     
-    bool dumpResourceResponseMIMETypes() const { return m_dumpResourceResponseMIMETypes; }
+    bool shouldDumpResourceResponseMIMETypes() const { return m_dumpResourceResponseMIMETypes; }
     void setDumpResourceResponseMIMETypes(bool dumpResourceResponseMIMETypes) { m_dumpResourceResponseMIMETypes = dumpResourceResponseMIMETypes; }
 
     bool dumpSelectionRect() const { return m_dumpSelectionRect; }

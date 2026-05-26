@@ -1,3 +1,4 @@
+<!-- webkit-test-runner [ dumpResourceResponseMIMETypes=true ] -->
 <html>
 <head>
 <script src="resources/sw-test-pre.js"></script>
@@ -10,7 +11,6 @@ if (window.testRunner) {
   testRunner.setShouldLogDownloadSize(true);
   testRunner.waitUntilDownloadFinished();
   testRunner.setShouldDownloadUndisplayableMIMETypes(true);
-  testRunner.dumpResourceResponseMIMETypes();
 }
 
 async function doTest()

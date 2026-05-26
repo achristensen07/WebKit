@@ -1,3 +1,4 @@
-html-document.html has MIME type text/html
 CONSOLE MESSAGE: Pass
 
+html-with-html.html has MIME type text/html
+html-document.html has MIME type text/html

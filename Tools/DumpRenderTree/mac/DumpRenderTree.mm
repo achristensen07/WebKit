@@ -1947,6 +1947,8 @@ static void runTest(const std::string& inputLine)
     gTestRunner->setDumpJSConsoleLogInStdErr(command.dumpJSConsoleLogInStdErr || options.dumpJSConsoleLogInStdErr());
     if (options.shouldDumpResourceLoadCallbacks())
         gTestRunner->setDumpResourceLoadCallbacks(true);
+    if (options.shouldDumpResourceResponseMIMETypes())
+        gTestRunner->setDumpResourceResponseMIMETypes(true);
 
 #if ENABLE(DNS_SERVER_FOR_TESTING)
     gTestRunner->initializeDNS();
