@@ -1,8 +1,4 @@
 module WebKit_DerivedSources_IPC {
-  explicit module IPCMessages {
-    header "IPCMessages.h"
-    export *
-  }
   explicit module TestWithCVPixelBufferMessages {
     header "TestWithCVPixelBufferMessages.h"
     export *
@@ -85,14 +81,6 @@ module WebKit_DerivedSources_IPC {
   }
   explicit module TestWithSuperclassAndWantsDispatchMessages {
     header "TestWithSuperclassAndWantsDispatchMessages.h"
-    export *
-  }
-  explicit module TestWithSwiftMessages {
-    header "TestWithSwiftMessages.h"
-    export *
-  }
-  explicit module TestWithSwiftConditionallyMessages {
-    header "TestWithSwiftConditionallyMessages.h"
     export *
   }
   explicit module TestWithValidatorMessages {
